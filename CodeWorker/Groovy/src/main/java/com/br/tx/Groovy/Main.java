@@ -20,6 +20,7 @@ public class Main {
 		InitModel initModel = parseAndValidInitModel(initData);
 		if (initModel == null) {
 			logger.warn("Processo finalizado por falta de parâmetros.");
+
 			return;
 		}
 
