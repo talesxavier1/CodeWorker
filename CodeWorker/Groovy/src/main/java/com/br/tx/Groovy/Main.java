@@ -24,7 +24,6 @@ public class Main {
 		}
 
 		GroovyBase groovyBase = new GroovyBase(initModel);
-
 	}
 
 	private static InitModel parseAndValidInitModel(String jsonString) {
