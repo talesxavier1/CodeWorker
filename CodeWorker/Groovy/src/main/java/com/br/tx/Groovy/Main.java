@@ -20,11 +20,11 @@ public class Main {
 		InitModel initModel = parseAndValidInitModel(initData);
 		if (initModel == null) {
 			logger.warn("Processo finalizado por falta de parâmetros.");
+
 			return;
 		}
 
 		GroovyBase groovyBase = new GroovyBase(initModel);
-
 	}
 
 	private static InitModel parseAndValidInitModel(String jsonString) {
