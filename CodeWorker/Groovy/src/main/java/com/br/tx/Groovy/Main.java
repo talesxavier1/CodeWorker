@@ -19,12 +19,20 @@ public class Main {
 		String initData = env.get("INIT_DATA");
 		InitModel initModel = parseAndValidInitModel(initData);
 		if (initModel == null) {
-			logger.warn("Processo finalizado por falta de parâmetros.");
-
+			logger.warn(String.format("Não foi possível fazer o parse do initData. %s Porcesso finalizado.",
+					System.lineSeparator()));
 			return;
 		}
 
 		GroovyBase groovyBase = new GroovyBase(initModel);
+		if (groovyBase.isEverythingOk() == false) {
+			logger.warn(String.format(
+					"Não foi possivel montar classe base para execução do groovy. %s Porcesso finalizado.",
+					System.lineSeparator()));
+			return;
+		}
+
+		groovyBase.executeScript(groovyBase.getGroovyMessage());
 	}
 
 	private static InitModel parseAndValidInitModel(String jsonString) {
