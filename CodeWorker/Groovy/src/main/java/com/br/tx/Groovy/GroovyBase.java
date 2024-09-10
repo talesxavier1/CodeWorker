@@ -1,7 +1,8 @@
 package com.br.tx.Groovy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.ArrayList;
+import java.io.PrintStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +22,8 @@ public class GroovyBase {
 	private File libFolder;
 	private File mainGroovyScriptFile;
 	private Object groovyMessage;
+	private PrintStream originalOut;
+	private PrintStream originalErr;
 
 	private boolean everythingOk = true;
 
@@ -34,13 +37,48 @@ public class GroovyBase {
 		Gson gson = new Gson();
 		this.groovyMessage = gson.fromJson(initModel.getJsonPayload(),
 				initModel.getMainScriptMessageClass().getClass());
+
+		this.originalOut = System.out;
+		this.originalErr = System.err;
 	}
 
-	public Object executeScript(Object groovyMessage) {
-		if (this.everythingOk == false) {
-			logger.warn("Classe GroovyBase carregada com erro. Não será posível executar função 'executeScript'.");
-		}
+	private void printcustomAction(String log) {
+		this.originalOut.print("\n printcustomAction \n" + log + "\n");
+	}
 
+	private void setCustomPrintAction() {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		PrintStream customPrintStream = new PrintStream(outputStream) {
+			@Override
+			public void print(String s) {
+				super.print(s);
+				printcustomAction(s);
+			}
+
+			@Override
+			public void println(String s) {
+				super.println(s);
+				printcustomAction(s);
+			}
+
+			@Override
+			public PrintStream printf(String format, Object... args) {
+				super.printf(format, args);
+				printcustomAction(String.format(format, args));
+				return null;
+			}
+		};
+
+		System.setOut(customPrintStream);
+		System.setErr(customPrintStream);
+	}
+
+	private void unsetCustomPrintAction() {
+		System.setOut(this.originalOut);
+		System.setErr(this.originalErr);
+	}
+
+	private GroovyShell mountGroovyShell() {
 		Binding binding = new Binding();
 		GroovyClassLoader classLoader = new GroovyClassLoader();
 
@@ -54,6 +92,15 @@ public class GroovyBase {
 		}
 
 		GroovyShell shell = new GroovyShell(classLoader, binding);
+		return shell;
+	}
+
+	public Object executeScript() {
+		if (this.everythingOk == false) {
+			logger.warn("Classe GroovyBase carregada com erro. Não será posível executar função 'executeScript'.");
+		}
+
+		GroovyShell shell = this.mountGroovyShell();
 		Script script;
 		try {
 			script = shell.parse(this.mainGroovyScriptFile);
@@ -61,23 +108,27 @@ public class GroovyBase {
 			logger.fatal("Erro ao fazer o parse do mainGroovyScriptFile", e);
 			return null;
 		}
+		this.setCustomPrintAction();
 
-		Object result = script.invokeMethod("processData", groovyMessage);
-		if (result.getClass().getName() != groovyMessage.getClass().getName()) {
-			var logList = new ArrayList<String>();
-			logList.add("Script executado, mas classe de retorno não foi a mesma enviada como parâmetro.");
-			logList.add(String.format("Classe enviada como parâmetro:%s", groovyMessage.getClass().getName()));
-			logList.add(String.format("Classe de retorno:%s", result.getClass().getName()));
-			logger.fatal(String.join(System.lineSeparator(), logList));
-			return null;
+		Object result = null;
+		try {
+			result = script.invokeMethod("processData", this.groovyMessage);
+			if (result.getClass().getName() != this.groovyMessage.getClass().getName()) {
+
+				String[] arrayLogs = {
+						"Script executado, mas classe de retorno não foi a mesma enviada como parâmetro.",
+						String.format("Classe enviada como parâmetro:%s", this.groovyMessage.getClass().getName()),
+						String.format("Classe de retorno:%s", result.getClass().getName())
+				};
+	
+				logger.fatal(String.join(System.lineSeparator(), arrayLogs));
+				return null;
+			}
+		} catch (Exception e) {
+		} finally {
+			this.unsetCustomPrintAction();
 		}
-		String a = result.getClass().getName();
-//		if(result.getClass().getName())
-		System.out.println("");
 
-		Gson gson = new Gson();
-		String saida = gson.toJson(result);
-		System.out.println("SAIDA =>> " + saida);
 		return result;
 	}
 
@@ -111,8 +162,7 @@ public class GroovyBase {
 		}
 		File file = new File(this.scriptFolder.getPath() + File.separator + mainGroovyScriptName);
 		if (file.exists() == false) {
-			logger.fatal(String.format("Diretório '%s' Não possui o arquivo '%s'.", this.scriptFolder.getPath(),
-					mainGroovyScriptName));
+			logger.fatal(String.format("Diretório '%s' Não possui o arquivo '%s'.", this.scriptFolder.getPath(), mainGroovyScriptName));
 			this.everythingOk = false;
 			return;
 		}
@@ -133,9 +183,5 @@ public class GroovyBase {
 
 	public boolean isEverythingOk() {
 		return everythingOk;
-	}
-
-	public Object getGroovyMessage() {
-		return groovyMessage;
 	}
 }
