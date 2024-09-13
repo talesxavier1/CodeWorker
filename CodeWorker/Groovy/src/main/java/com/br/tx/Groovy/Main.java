@@ -13,6 +13,7 @@ public class Main {
 	static final Logger logger = LogManager.getLogger(Main.class);
 
 	public static void main(String[] args) {
+		logger.warn("teste");
 		Map<String, String> env = System.getenv();
 		String initData = env.get("INIT_DATA");
 		InitModel initModel = parseAndValidInitModel(initData);
