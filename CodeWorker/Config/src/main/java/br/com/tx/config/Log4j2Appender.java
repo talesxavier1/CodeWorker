@@ -20,6 +20,7 @@ public class Log4j2Appender extends AbstractAppender {
 		super(name, filter, layout);
 	}
 
+	@SuppressWarnings("unchecked")
 	@PluginFactory
 	public static Log4j2Appender createAppender(@PluginAttribute("name") String name,
 			@SuppressWarnings("rawtypes") @PluginElement("Layout") Layout layout,
