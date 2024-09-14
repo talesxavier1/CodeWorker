@@ -13,6 +13,8 @@ public class Main {
 	static final Logger logger = LogManager.getLogger(Main.class);
 
 	public static void main(String[] args) {
+		System.out.println("Class Loader: " + Main.class.getClassLoader());
+		System.out.println("Classpath: " + System.getProperty("java.class.path"));
 		logger.warn("teste");
 		Map<String, String> env = System.getenv();
 		String initData = env.get("INIT_DATA");

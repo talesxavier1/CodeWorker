@@ -75,7 +75,7 @@ public class InitModel {
 		} else {
 			String className = "com.br.tx.GroovyMessage." + mainScriptMessageClassName;
 			try {
-				Class<?> clazz = Class.forName(className);
+				Class.forName(className);
 			} catch (ClassNotFoundException e) {
 				logList.add(String.format("mainScriptMessageClassName '%s' inválido. Classe não encontrada.",
 						mainScriptMessageClassName));
