@@ -1,6 +1,7 @@
 package com.br.tx.Groovy;
 
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,16 +10,19 @@ import com.br.tx.Models.InitModel;
 import com.google.gson.Gson;
 
 public class Main {
-	// static final Logger logger = ConfigLogger.getLogger(Main.class);
+
 	static final Logger logger = LogManager.getLogger(Main.class);
 
 	public static void main(String[] args) {
-		System.out.println("Class Loader: " + Main.class.getClassLoader());
-		System.out.println("Classpath: " + System.getProperty("java.class.path"));
-		logger.warn("teste");
-		Map<String, String> env = System.getenv();
-		String initData = env.get("INIT_DATA");
-		InitModel initModel = parseAndValidInitModel(initData);
+		String b64InitData;
+		if (args.length > 0) {
+			b64InitData = args[0];
+		} else {
+			logger.warn("initData não passado como args da execução");
+			return;
+		}
+
+		InitModel initModel = parseAndValidInitModel(b64InitData);
 		if (initModel == null) {
 			logger.warn(String.format("Não foi possível fazer o parse do initData. %s Porcesso finalizado.", System.lineSeparator()));
 			return;
@@ -33,6 +37,7 @@ public class Main {
 		Object result = groovyBase.executeScript();
 		if (result == null) {
 			logger.warn("Execução do script retornou 'null'. Processo finalizado.");
+			System.exit(1);
 			return;
 		}
 
@@ -48,14 +53,29 @@ public class Main {
 
 	}
 
-	private static InitModel parseAndValidInitModel(String jsonString) {
+	private static InitModel parseAndValidInitModel(String b64InitData) {
+		String jsonString;
+		try {
+			byte[] bJsonString = Base64.getDecoder().decode(b64InitData);
+			jsonString = new String(bJsonString, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			String[] arrayLogs = {
+					"Erro ao fazer o decode do b64InitData.",
+					String.format("Valor passado: '%s'", b64InitData),
+					" "
+			};
+
+			logger.fatal(String.join(System.lineSeparator(), arrayLogs), e);
+			return null;
+		}
+
 		InitModel finalInitModel = null;
 		try {
 			InitModel initModel = new Gson().fromJson(jsonString, InitModel.class);
 			String resultValidateModel = initModel.validModel();
 			if (resultValidateModel != null) {
 				String[] arrayLogs = {
-						"Valor passado para variável de ambiente 'INIT_DATA' não é valida.",
+						"Valor passado para b64InitData não é valido.",
 						String.format("Valor passado: '%s'", jsonString),
 						String.format("Mensagem da validação: '%s'", resultValidateModel)
 				};
@@ -67,7 +87,9 @@ public class Main {
 		} catch (Exception e) {
 			String[] arrayLogs = {
 					"Erro ao Desserializar o initModel.",
-					String.format("Valor passado: '%s'", jsonString)
+					String.format("Valor b64 passado: '%s'", b64InitData),
+					String.format("Valor b64 decodificado: '%s'", jsonString),
+					" ",
 			};
 
 			logger.fatal(String.join(System.lineSeparator(), arrayLogs), e);
