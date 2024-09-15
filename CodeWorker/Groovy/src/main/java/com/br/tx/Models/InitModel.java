@@ -2,21 +2,30 @@ package com.br.tx.Models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class InitModel {
 
-	private String scriptDir;
-	private String libDir;
+	private String scriptFolderDir;
+	private String libFolderDir;
 	private boolean haveLib;
 	private String mainScriptName;
+	private String mainScriptMessageClassName;
+	private String jsonPayload;
 
-	public String getScriptDir() {
-		return scriptDir;
+	public String getJsonPayload() {
+		return jsonPayload;
 	}
 
-	public String getLibDir() {
-		return libDir;
+	public void setJsonPayload(String jsonPayload) {
+		this.jsonPayload = jsonPayload;
+	}
+
+	public String getScriptFolderDir() {
+		return scriptFolderDir;
+	}
+
+	public String getLibFolderDir() {
+		return libFolderDir;
 	}
 
 	public boolean isHaveLib() {
@@ -27,6 +36,25 @@ public class InitModel {
 		return mainScriptName;
 	}
 
+	public String getMainScriptMessageClassName() {
+		return mainScriptMessageClassName;
+	}
+
+	public void setMainScriptMessageClass(String mainScriptMessageClass) {
+		this.mainScriptMessageClassName = mainScriptMessageClass;
+	}
+
+	public Object getMainScriptMessageClass() {
+		try {
+			String className = "com.br.tx.GroovyMessage." + this.mainScriptMessageClassName;
+			Class<?> clazz = Class.forName(className);
+			Object finalClass = clazz.getDeclaredConstructor().newInstance();
+			return finalClass;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public String validModel() {
 		List<String> logList = new ArrayList<String>();
 
@@ -34,12 +62,28 @@ public class InitModel {
 			logList.add("mainScriptName nulo.");
 		}
 
-		if (this.scriptDir == null) {
-			logList.add("scriptDir nulo.");
+		if (this.jsonPayload == null) {
+			logList.add("jsonPayload nulo.");
 		}
 
-		if (haveLib == true && libDir == null) {
-			logList.add("libDir nulo com haveLib 'true'.");
+		if (this.scriptFolderDir == null) {
+			logList.add("scriptFolderDir nulo.");
+		}
+
+		if (this.mainScriptMessageClassName == null) {
+			logList.add("mainScriptMessageClassName nulo.");
+		} else {
+			String className = "com.br.tx.GroovyMessage." + mainScriptMessageClassName;
+			try {
+				Class.forName(className);
+			} catch (ClassNotFoundException e) {
+				logList.add(String.format("mainScriptMessageClassName '%s' inválido. Classe não encontrada.",
+						mainScriptMessageClassName));
+			}
+		}
+
+		if (haveLib == true && libFolderDir == null) {
+			logList.add("libFolderDir nulo com haveLib 'true'.");
 		}
 
 		if (logList.isEmpty()) {
@@ -50,28 +94,9 @@ public class InitModel {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(haveLib, libDir, mainScriptName, scriptDir);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		InitModel other = (InitModel) obj;
-		return haveLib == other.haveLib && Objects.equals(libDir, other.libDir)
-				&& Objects.equals(mainScriptName, other.mainScriptName) && Objects.equals(scriptDir, other.scriptDir);
-	}
-
-	@Override
 	public String toString() {
-		return "InitModel [scriptDir=" + scriptDir + ", libDir=" + libDir + ", haveLib=" + haveLib + ", mainScriptName="
-				+ mainScriptName + ", getScriptDir()=" + getScriptDir() + ", getLibDir()=" + getLibDir()
-				+ ", isHaveLib()=" + isHaveLib() + ", getMainScriptName()=" + getMainScriptName() + ", hashCode()="
-				+ hashCode() + ", getClass()=" + getClass() + ", toString()=" + super.toString() + "]";
+		return "InitModel [scriptFolderDir=" + scriptFolderDir + ", libFolderDir=" + libFolderDir + ", haveLib="
+				+ haveLib + ", mainScriptName=" + mainScriptName + ", mainScriptMessageClassName="
+				+ mainScriptMessageClassName + "]";
 	}
 }
