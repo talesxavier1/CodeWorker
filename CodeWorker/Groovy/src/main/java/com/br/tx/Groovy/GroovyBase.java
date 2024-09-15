@@ -3,6 +3,13 @@ package com.br.tx.Groovy;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,25 +115,37 @@ public class GroovyBase {
 			logger.fatal("Erro ao fazer o parse do mainGroovyScriptFile", e);
 			return null;
 		}
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Callable<Object> invoke = () -> script.invokeMethod("processData", this.groovyMessage);
+		Future<Object> future = executor.submit(invoke);
 		this.setCustomPrintAction();
 
 		Object result = null;
 		try {
-			result = script.invokeMethod("processData", this.groovyMessage);
-			if (result.getClass().getName() != this.groovyMessage.getClass().getName()) {
+			result = future.get(10, TimeUnit.SECONDS);
+			System.out.println("Resultado: " + result);
+		} catch (TimeoutException e) {
+			logger.fatal("Tempo limite de execução atingido. execução finalizada.", e);
+			future.cancel(true);
+		} catch (ExecutionException e) {
+			logger.fatal("Erro ao executar groovy script.", e);
+		} catch (Exception e) {
+			logger.fatal("Erro desconhecido ao executar groovy script.", e);
+		} finally {
+			executor.shutdownNow();
+			this.unsetCustomPrintAction();
+		}
 
+		if (result != null) {
+			if (result.getClass().getName() != this.groovyMessage.getClass().getName()) {
 				String[] arrayLogs = {
 						"Script executado, mas classe de retorno não foi a mesma enviada como parâmetro.",
 						String.format("Classe enviada como parâmetro:%s", this.groovyMessage.getClass().getName()),
-						String.format("Classe de retorno:%s", result.getClass().getName())
-				};
-	
+						String.format("Classe de retorno:%s", result.getClass().getName()) };
 				logger.fatal(String.join(System.lineSeparator(), arrayLogs));
 				return null;
 			}
-		} catch (Exception e) {
-		} finally {
-			this.unsetCustomPrintAction();
 		}
 
 		return result;
