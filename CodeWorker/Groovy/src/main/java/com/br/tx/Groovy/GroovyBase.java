@@ -58,7 +58,6 @@ public class GroovyBase {
 		PrintStream customPrintStream = new PrintStream(outputStream) {
 			@Override
 			public void print(String s) {
-				super.print(s);
 				printcustomAction(s);
 			}
 
