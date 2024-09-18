@@ -10,8 +10,6 @@ public class DbInterfaceApplication {
 	static final Logger logger = LogManager.getLogger(DbInterfaceApplication.class);
 
 	public static void main(String[] args) {
-		logger.warn("teste");
-
 		SpringApplication.run(DbInterfaceApplication.class, args);
 	}
 
