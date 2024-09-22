@@ -45,8 +45,8 @@
 			</plugin>
 		</plugins>
 	</build>
-	<artifactId>Groovy</artifactId>
-	<name>Groovy</name>
+	<artifactId>GroovyEngine</artifactId>
+	<name>GroovyEngine</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

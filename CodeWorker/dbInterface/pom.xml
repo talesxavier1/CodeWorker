@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com.tx</groupId>
-	<artifactId>dbInterface</artifactId>
+	<artifactId>DBInterface</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>dbInterface</name>
+	<name>DBInterface</name>
 	<description>DB Interface</description>
 	<url/>
 	<licenses>

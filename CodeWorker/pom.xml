@@ -9,9 +9,9 @@
 	<packaging>pom</packaging>
 	<name>Code Worker</name>
 	<modules>
-		<module>Groovy</module>
+		<module>GroovyEngine</module>
 		<module>Config</module>
-		<module>dbInterface</module>
+		<module>DBInterface</module>
 	</modules>
 	<dependencies>
 		<!-- Log4j 2 -->
