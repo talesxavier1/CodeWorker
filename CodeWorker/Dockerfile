@@ -1,0 +1,71 @@
+FROM maven:3-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . /app
+RUN mvn clean package
+
+FROM openjdk:17-alpine
+
+COPY --from=build /app/Config/target/*.jar /home/app/Config/
+COPY --from=build /app/DBInterface/target/*.jar /home/app/DBInterface/
+COPY --from=build /app/GroovyEngine/target/*.jar /home/app/GroovyEngine/
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Instalando e atualizando dependências." && \
+    apk update && \
+	apk add busybox shadow unzip
+	
+#RUN echo ">>>>>>>>>>>>>>>>>>>>>> Instalando groovy." && \
+#    wget https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-4.0.21.zip && \
+#    unzip apache-groovy-binary-4.0.21.zip && \
+#    rm apache-groovy-binary-4.0.21.zip && \
+#    mv groovy-4.0.21 /opt/groovy-4.0.21 && \
+#    ln -s /opt/groovy-4.0.21/bin/groovy /bin/groovy
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Criando diretórios." && \
+    mkdir -p /home/chroot/jail/bin/ && \
+    mkdir -p /home/chroot/jail/home/ && \
+    mkdir -p /home/chroot/jail/lib/ && \
+    mkdir -p /home/chroot/jail/lib64/ && \
+    mkdir -p /home/chroot/jail/dev/ && \
+    mkdir -p /home/chroot/jail/etc/ && \
+    mkdir -p /home/chroot/jail/proc/ && \
+    mkdir -p /home/chroot/jail/home/chrootUser
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Criando usuário e grupo chroot" && \
+    addgroup chrootGroup && \
+    adduser -G chrootGroup -s /bin/sh -D chrootUser && \
+    echo -e "root\nroot" | passwd chrootUser && \
+    chown chrootUser:chrootGroup /home/chroot/jail/home/chrootUser
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Copiando dependências." && \
+    cp /bin/busybox /home/chroot/jail/bin/ && \
+    cp -r /lib/ld-musl-* /home/chroot/jail/lib/ && \
+    cp -r /lib/libc.musl-* /home/chroot/jail/lib/ && \
+    mknod -m 666 /home/chroot/jail/dev/null c 1 3 && \
+    mknod -m 666 /home/chroot/jail/dev/zero c 1 5
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Criando arquivos do usuário no chroot." && \ 
+    echo "chrootUser:x:1000:1000:My User,,,:/home/chrootUser:/bin/sh" > /home/chroot/jail/etc/passwd && \ 
+    echo "chrootGroup:x:1000:" > /home/chroot/jail/etc/group 
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Adicionando binários ao chroot." && \ 
+    cd /home/chroot/jail/bin/ && \ 
+    ln -s busybox ls && \ 
+    ln -s busybox sh && \ 
+    ln -s busybox cp && \ 
+    ln -s busybox mv && \ 
+    ln -s busybox vi && \ 
+    ln -s busybox mkdir && \
+    ln -s busybox groovy
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Criando aliases." && \
+    echo "alias chrootRun='chroot /home/chroot/jail /bin/busybox sh'" | tee -a ~/.profile && \
+    echo "alias ll='ls -lah'" | tee -a ~/.profile && \
+    echo "alias update='apk update && apk upgrade'" | tee -a ~/.profile
+	
+
+EXPOSE 8080
+
+ENTRYPOINT [ "java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005","-jar", "/home/app/DBInterface/DBInterface-0.0.1-SNAPSHOT.jar" ]
+
+
+
