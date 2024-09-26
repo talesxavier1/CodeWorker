@@ -12,6 +12,7 @@
 		<module>GroovyEngine</module>
 		<module>Config</module>
 		<module>DBInterface</module>
+		<module>Worker</module>
 	</modules>
 	<dependencies>
 		<!-- Log4j 2 -->
