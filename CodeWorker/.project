@@ -16,21 +16,12 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1727142133398</id>
+			<id>1727312048005</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.core.resources.regexFilterMatcher</id>
-				<arguments>1.0-name-matches-false-true-1.0-name-matches-false-true-1.0-name-matches-false-true-node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
-			</matcher>
-		</filter>
-		<filter>
-			<id>1727142133409</id>
-			<name></name>
-			<type>5</type>
-			<matcher>
-				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-name-matches-false-true-.*docker.*</arguments>
+				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>

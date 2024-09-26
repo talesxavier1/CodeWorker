@@ -5,22 +5,24 @@ RUN mvn clean package
 
 FROM openjdk:17-alpine
 
-COPY --from=build /app/Config/target/*.jar /home/app/Config/
-COPY --from=build /app/DBInterface/target/*.jar /home/app/DBInterface/
-COPY --from=build /app/GroovyEngine/target/*.jar /home/app/GroovyEngine/
+COPY --from=build /app/Config/target/ /home/app/Config/
+COPY --from=build /app/DBInterface/target/ /home/app/DBInterface/
+COPY --from=build /app/GroovyEngine/target/ /home/app/GroovyEngine/
+COPY --from=build /app/Worker/target/ /home/app/Worker/
 
 RUN echo ">>>>>>>>>>>>>>>>>>>>>> Instalando e atualizando dependências." && \
     apk update && \
-	apk add busybox shadow unzip
-	
-#RUN echo ">>>>>>>>>>>>>>>>>>>>>> Instalando groovy." && \
-#    wget https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-4.0.21.zip && \
-#    unzip apache-groovy-binary-4.0.21.zip && \
-#    rm apache-groovy-binary-4.0.21.zip && \
-#    mv groovy-4.0.21 /opt/groovy-4.0.21 && \
-#    ln -s /opt/groovy-4.0.21/bin/groovy /bin/groovy
+    apk add busybox shadow unzip
+
+RUN echo ">>>>>>>>>>>>>>>>>>>>>> Instalando groovy." && \
+    wget https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-4.0.21.zip && \
+    unzip apache-groovy-binary-4.0.21.zip && \
+    rm apache-groovy-binary-4.0.21.zip && \
+    mv groovy-4.0.21 /opt/groovy-4.0.21 && \
+    ln -s /opt/groovy-4.0.21/bin/groovy /bin/groovy
 
 RUN echo ">>>>>>>>>>>>>>>>>>>>>> Criando diretórios." && \
+    mkdir -p /home/execution/ && \
     mkdir -p /home/chroot/jail/bin/ && \
     mkdir -p /home/chroot/jail/home/ && \
     mkdir -p /home/chroot/jail/lib/ && \
@@ -61,11 +63,10 @@ RUN echo ">>>>>>>>>>>>>>>>>>>>>> Criando aliases." && \
     echo "alias chrootRun='chroot /home/chroot/jail /bin/busybox sh'" | tee -a ~/.profile && \
     echo "alias ll='ls -lah'" | tee -a ~/.profile && \
     echo "alias update='apk update && apk upgrade'" | tee -a ~/.profile
-	
+
 
 EXPOSE 8080
 
 ENTRYPOINT [ "java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005","-jar", "/home/app/DBInterface/DBInterface-0.0.1-SNAPSHOT.jar" ]
-
 
 
