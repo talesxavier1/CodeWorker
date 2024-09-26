@@ -40,6 +40,7 @@
 		</dependency>
 		<dependency>
 <<<<<<< HEAD:CodeWorker/DBInterface/pom.xml
+<<<<<<< HEAD:CodeWorker/DBInterface/pom.xml
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
@@ -47,6 +48,10 @@
 		    <groupId>com.github.ulisesbocchio</groupId>
 		    <artifactId>jasypt-spring-boot-starter</artifactId>
 		    <version>3.0.5</version>
+=======
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-validation</artifactId>
+>>>>>>> parent of 9cf0a4d (dev):CodeWorker/dbInterface/pom.xml
 =======
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-validation</artifactId>

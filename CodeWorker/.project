@@ -15,6 +15,7 @@
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
 <<<<<<< HEAD
+<<<<<<< HEAD
 	<filteredResources>
 		<filter>
 			<id>1727312048005</id>
@@ -26,6 +27,8 @@
 			</matcher>
 		</filter>
 	</filteredResources>
+=======
+>>>>>>> parent of 9cf0a4d (dev)
 =======
 >>>>>>> parent of 9cf0a4d (dev)
 </projectDescription>
