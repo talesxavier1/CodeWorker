@@ -14,21 +14,4 @@
 	<natures>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
-<<<<<<< HEAD
-<<<<<<< HEAD
-	<filteredResources>
-		<filter>
-			<id>1727312048005</id>
-			<name></name>
-			<type>30</type>
-			<matcher>
-				<id>org.eclipse.core.resources.regexFilterMatcher</id>
-				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
-			</matcher>
-		</filter>
-	</filteredResources>
-=======
->>>>>>> parent of 9cf0a4d (dev)
-=======
->>>>>>> parent of 9cf0a4d (dev)
 </projectDescription>
